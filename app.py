@@ -92,12 +92,18 @@ st.title("DocumentGPT")
 with st.sidebar:
     file = st.file_uploader(
         """
-    Use this chatbot to ask questions to an AI about your files! \n
-    You can upload a .txt .pdf or .docx file
+    챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
+    <.txt .pdf or .docx file 가능>
                             """,
         type=["pdf", "txt", "docx"],
     )
-
+    c = st.container()
+    c.link_button(
+        "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
+    )
+    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
+    # st.write("file_code: https://zzangtaedocumentgpt.streamlit.app/")
+    # st.write("git_hub: https://github.com/jangtaehun/DocumentGPT")
 
 # file이 존재하면 실행
 if file:
