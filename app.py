@@ -15,6 +15,11 @@ st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
 
 
 with st.sidebar:
+
+    openaikey = None
+    openaikey = st.text_input(" Your OpenAI API key: ", type="password")
+    # os.environ["OPENAI_API_KEY"] = openaikey
+
     file = st.file_uploader(
         """
     챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
@@ -22,9 +27,6 @@ with st.sidebar:
                             """,
         type=["pdf", "txt", "docx"],
     )
-    openaikey = None
-    openaikey = st.text_input("작동합니다! Your OpenAI API key: ", type="password")
-    os.environ["OPENAI_API_KEY"] = openaikey
 
     c = st.container()
     c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
@@ -47,17 +49,22 @@ class ChatCallbackHandler(BaseCallbackHandler):
 @st.cache_data(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
-    file_path = f"files/{file.name}"
+    # file_path = f"files/{file.name}"
+    file_path = f"./.cache/files/{file.name}"
+    os.makedirs(f"./..cache/files/", exist_ok=True)
+
     with open(file_path, "wb") as f:
         f.write(file_content)
-    cache_dir = LocalFileStore(f"files/embeddings/{file.name}")
+    loader = UnstructuredFileLoader(f"files/{file.name}")
+
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = UnstructuredFileLoader(f"files/{file.name}")
     docs = loader.load_and_split(text_splitter=splitter)
+    cache_dir = LocalFileStore(f"files/embeddings/{file.name}")
+
     embeddings = OpenAIEmbeddings()
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
@@ -107,11 +114,11 @@ llm = ChatOpenAI(
     temperature=0.1,
     streaming=True,
     callbacks=[ChatCallbackHandler()],
-    # openai_api_key=openai_api_key,
+    api_key=openaikey,
 )
 
 # file이 존재하면 실행
-if file:
+if file and openaikey:
     retriever = embed_file(file)
     send_message("나는 준비됐어 물어봐!!", "ai", save=False)
     paint_history()
