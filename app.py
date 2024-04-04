@@ -95,7 +95,9 @@ with st.sidebar:
         type=["pdf", "txt", "docx"],
     )
 
-    api_key = st.text_input(label="api_key")
+    openai_api_key = st.text_input(
+        "OpenAI API Key", key="document_api_key", type="password"
+    )
 
     c = st.container()
     # c.link_button(
