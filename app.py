@@ -107,7 +107,7 @@ llm = ChatOpenAI(
     temperature=0.1,
     streaming=True,
     callbacks=[ChatCallbackHandler()],
-    openai_api_key=openai_api_key,
+    # openai_api_key=openai_api_key,
 )
 
 # file이 존재하면 실행
