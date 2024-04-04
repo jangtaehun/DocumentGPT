@@ -20,15 +20,10 @@ with st.sidebar:
                             """,
         type=["pdf", "txt", "docx"],
     )
-
     openai_api_key = st.text_input(
         "OpenAI API Key", key="document_api_key", type="password"
     )
-
     c = st.container()
-    # c.link_button(
-    #     "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
-    # )
     c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
 
 
