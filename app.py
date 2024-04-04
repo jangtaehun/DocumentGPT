@@ -23,7 +23,7 @@ with st.sidebar:
         type=["pdf", "txt", "docx"],
     )
     openaikey = None
-    openaikey = st.text_input("Your OpenAI API key: ", type="password")
+    openaikey = st.text_input("작동합니다! Your OpenAI API key: ", type="password")
     os.environ["OPENAI_API_KEY"] = openaikey
 
     c = st.container()
