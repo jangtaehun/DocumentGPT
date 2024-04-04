@@ -8,6 +8,7 @@ from langchain.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
+import os
 
 
 st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
@@ -23,6 +24,7 @@ with st.sidebar:
     openai_api_key = st.text_input(
         "OpenAI API Key", key="document_api_key", type="password"
     )
+    os.environ["OPENAI_API_KEY"] = openai_api_key
     c = st.container()
     c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
 
