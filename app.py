@@ -22,7 +22,7 @@ with st.sidebar:
 
     file = st.file_uploader(
         """
-    챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
+    파일을 업로드해주세요!! \n
     <.txt .pdf or .docx file 가능>
                             """,
         type=["pdf", "txt", "docx"],
