@@ -27,23 +27,24 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 @st.cache_data(show_spinner="Embedding file...")
 def embed_file(file):
-    file_content = file.read()
-    file_path = f"files/{file.name}"
     # file_path = f"./.cache/files/{file.name}"
     # os.makedirs(f"./..cache/files/", exist_ok=True)
 
+    file_content = file.read()
+    file_path = f"files/{file.name}"
+
     with open(file_path, "wb") as f:
         f.write(file_content)
-    loader = UnstructuredFileLoader(f"files/{file.name}")
 
+    cache_dir = LocalFileStore(f"files/embeddings/{file.name}")
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
         chunk_size=600,
         chunk_overlap=100,
     )
-    docs = loader.load_and_split(text_splitter=splitter)
-    cache_dir = LocalFileStore(f"files/embeddings/{file.name}")
 
+    loader = UnstructuredFileLoader(f"files/{file.name}")
+    docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OpenAIEmbeddings()
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
@@ -78,8 +79,10 @@ st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
 
 with st.sidebar:
 
-    # openaikey = st.text_input(" Your OpenAI API key: ", type="password")
+    # openaikey = None
+    # openaikey = st.text_input("작동합니다! Your OpenAI API key: ", type="password")
     st.session_state["api_key"] = st.text_input("Your OpenAI API Key")
+    # os.environ["OPENAI_API_KEY"] = openaikey
 
     file = st.file_uploader("파일을 업로드해주세요!!", type=["pdf", "txt", "docx"])
 
