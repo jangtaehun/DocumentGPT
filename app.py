@@ -11,6 +11,25 @@ from langchain.callbacks.base import BaseCallbackHandler
 import os
 
 
+st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
+
+
+with st.sidebar:
+    file = st.file_uploader(
+        """
+    챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
+    <.txt .pdf or .docx file 가능>
+                            """,
+        type=["pdf", "txt", "docx"],
+    )
+    openaikey = None
+    openaikey = st.text_input("작동합니다! Your OpenAI API key: ", type="password")
+    os.environ["OPENAI_API_KEY"] = openaikey
+
+    c = st.container()
+    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
+
+
 class ChatCallbackHandler(BaseCallbackHandler):
     message = ""
 
@@ -27,22 +46,16 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 @st.cache_data(show_spinner="Embedding file...")
 def embed_file(file):
-    # file_path = f"./.cache/files/{file.name}"
-    # os.makedirs(f"./..cache/files/", exist_ok=True)
-
     file_content = file.read()
     file_path = f"files/{file.name}"
-
     with open(file_path, "wb") as f:
         f.write(file_content)
-
     cache_dir = LocalFileStore(f"files/embeddings/{file.name}")
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
         chunk_size=600,
         chunk_overlap=100,
     )
-
     loader = UnstructuredFileLoader(f"files/{file.name}")
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OpenAIEmbeddings()
@@ -50,10 +63,6 @@ def embed_file(file):
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
     return retriever
-
-
-def format_docs(docs):
-    return "\n\n".join(document.page_content for document in docs)
 
 
 def save_message(message, role):
@@ -74,20 +83,8 @@ def paint_history():
         send_message(message["message"], message["role"], save=False)
 
 
-st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
-
-
-with st.sidebar:
-
-    # openaikey = None
-    # openaikey = st.text_input("작동합니다! Your OpenAI API key: ", type="password")
-    st.session_state["api_key"] = st.text_input("Your OpenAI API Key")
-    # os.environ["OPENAI_API_KEY"] = openaikey
-
-    file = st.file_uploader("파일을 업로드해주세요!!", type=["pdf", "txt", "docx"])
-
-    c = st.container()
-    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
+def format_docs(docs):
+    return "\n\n".join(document.page_content for document in docs)
 
 
 template = ChatPromptTemplate.from_messages(
@@ -107,22 +104,18 @@ st.title("DocumentGPT")
 
 
 # file이 존재하면 실행
-if file and st.session_state["api_key"]:
-
+if file:
     llm = ChatOpenAI(
         temperature=0.1,
         streaming=True,
         callbacks=[ChatCallbackHandler()],
-        openai_api_key=st.session_state["api_key"],
+        # openai_api_key=openai_api_key,
     )
 
     retriever = embed_file(file)
-
     send_message("나는 준비됐어 물어봐!!", "ai", save=False)
     paint_history()
-
     message = st.chat_input("첨부한 파일에 대해 어떤 것이든 물어봐!!")
-
     if message:
         send_message(message, "human")
         chain = (
