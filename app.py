@@ -13,6 +13,7 @@ import os
 
 st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
 
+
 with st.sidebar:
     file = st.file_uploader(
         """
@@ -21,11 +22,10 @@ with st.sidebar:
                             """,
         type=["pdf", "txt", "docx"],
     )
-    openai_api_key = None
-    openai_api_key = st.text_input(
-        "OpenAI API Key", key="document_api_key", type="password"
-    )
-    os.environ["OPENAI_API_KEY"] = openai_api_key
+    openaikey = None
+    openaikey = st.text_input("Your OpenAI API key: ", type="password")
+    os.environ["OPENAI_API_KEY"] = openaikey
+
     c = st.container()
     c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
 
