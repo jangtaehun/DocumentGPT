@@ -12,6 +12,25 @@ from langchain.callbacks.base import BaseCallbackHandler
 
 st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
 
+with st.sidebar:
+    file = st.file_uploader(
+        """
+    챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
+    <.txt .pdf or .docx file 가능>
+                            """,
+        type=["pdf", "txt", "docx"],
+    )
+
+    openai_api_key = st.text_input(
+        "OpenAI API Key", key="document_api_key", type="password"
+    )
+
+    c = st.container()
+    # c.link_button(
+    #     "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
+    # )
+    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
+
 
 class ChatCallbackHandler(BaseCallbackHandler):
     message = ""
@@ -86,30 +105,11 @@ template = ChatPromptTemplate.from_messages(
 st.title("DocumentGPT")
 
 
-with st.sidebar:
-    file = st.file_uploader(
-        """
-    챗봇을 사용하고 싶다면 파일을 업로드해주세요!! \n
-    <.txt .pdf or .docx file 가능>
-                            """,
-        type=["pdf", "txt", "docx"],
-    )
-
-    openai_api_key = st.text_input(
-        "OpenAI API Key", key="document_api_key", type="password"
-    )
-
-    c = st.container()
-    # c.link_button(
-    #     "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
-    # )
-    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
-
 llm = ChatOpenAI(
     temperature=0.1,
     streaming=True,
     callbacks=[ChatCallbackHandler()],
-    openai_api_key=api_key,
+    openai_api_key=openai_api_key,
 )
 
 # file이 존재하면 실행
