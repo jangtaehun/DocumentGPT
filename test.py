@@ -39,8 +39,11 @@ class ChatCallbackHandler(BaseCallbackHandler):
 def embed_file(file):
     # create a copy of the file to work with
     file_content = file.read()
-    file_path = f"./.cache/files/{file.name}"
-    os.makedirs(f"./..cache/files/", exist_ok=True)
+    file_content = file.read()
+    file_path = f"files/{file.name}"
+
+    # file_path = f"./.cache/files/{file.name}"
+    # os.makedirs(f"./..cache/files/", exist_ok=True)
     with open(file_path, "wb") as f:
         f.write(file_content)
 
