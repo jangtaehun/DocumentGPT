@@ -27,9 +27,6 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message_box.markdown(self.message)
 
 
-llm = ChatOpenAI(temperature=0.1, streaming=True, callbacks=[ChatCallbackHandler()])
-
-
 @st.cache_data(show_spinner="Embedding file...")
 def embed_file(file):
     file_content = file.read()
@@ -97,13 +94,21 @@ with st.sidebar:
                             """,
         type=["pdf", "txt", "docx"],
     )
+
+    api_key = st.text_input(label="api_key")
+
     c = st.container()
-    c.link_button(
-        "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
-    )
+    # c.link_button(
+    #     "streamlit file code", url="https://zzangtaedocumentgpt.streamlit.app/"
+    # )
     c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
-    # st.write("file_code: https://zzangtaedocumentgpt.streamlit.app/")
-    # st.write("git_hub: https://github.com/jangtaehun/DocumentGPT")
+
+llm = ChatOpenAI(
+    temperature=0.1,
+    streaming=True,
+    callbacks=[ChatCallbackHandler()],
+    openai_api_key=api_key,
+)
 
 # file이 존재하면 실행
 if file:
