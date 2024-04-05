@@ -10,6 +10,13 @@ from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 import os
 
+st.set_page_config(
+    page_title="DocumentGPT",
+    page_icon="📑",
+)
+
+st.title("DocumentGPT")
+
 
 class ChatCallbackHandler(BaseCallbackHandler):
     message = ""
@@ -74,9 +81,6 @@ def paint_history():
         send_message(message["message"], message["role"], save=False)
 
 
-st.set_page_config(page_title="CodeChallengeGPT", page_icon="📚")
-
-
 with st.sidebar:
 
     # openaikey = None
@@ -101,9 +105,6 @@ template = ChatPromptTemplate.from_messages(
         ("human", "{question}"),
     ]
 )
-
-
-st.title("DocumentGPT")
 
 
 # file이 존재하면 실행
