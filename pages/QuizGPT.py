@@ -83,20 +83,50 @@ if openaikey:
         docs = loader.load_and_split(text_splitter=splitter)
         return docs
 
-    @st.cache_data(show_spinner="Making quiz...")
-    def run_quiz_chain(_docs, topic):
-        chain = (
-            {"context": hard_questions_chain} | hard_formatting_chain | output_parser
-        )
-        return chain.invoke(_docs)
+    select_custom = st.selectbox(
+        "난이도",
+        (
+            "쉬움",
+            "어려움",
+        ),
+    )
+    if select_custom == "쉬움":
 
-    @st.cache_data(show_spinner="Searching Wikipedia...")
-    def wiki_search(term):
-        # hash: 들어오는 데이터의 서명을 생성한다는 것
-        retriever = WikipediaRetriever(top_k_results=3, lang="ko")
-        # top_k_results=1 : 첫 번째 결과만 사용
-        docs = retriever.get_relevant_documents(term)
-        return docs
+        @st.cache_data(show_spinner="Making quiz...")
+        def run_quiz_chain(_docs, topic):
+            chain = (
+                {"context": easy_questions_chain}
+                | easy_formatting_chain
+                | output_parser
+            )
+            return chain.invoke(_docs)
+
+        @st.cache_data(show_spinner="Searching Wikipedia...")
+        def wiki_search(term):
+            # hash: 들어오는 데이터의 서명을 생성한다는 것
+            retriever = WikipediaRetriever(top_k_results=3)  # lang="ko"
+            # top_k_results=1 : 첫 번째 결과만 사용
+            docs = retriever.get_relevant_documents(term)
+            return docs
+
+    else:
+
+        @st.cache_data(show_spinner="Making quiz...")
+        def run_quiz_chain(_docs, topic):
+            chain = (
+                {"context": hard_questions_chain}
+                | hard_formatting_chain
+                | output_parser
+            )
+            return chain.invoke(_docs)
+
+        @st.cache_data(show_spinner="Searching Wikipedia...")
+        def wiki_search(term):
+            # hash: 들어오는 데이터의 서명을 생성한다는 것
+            retriever = WikipediaRetriever(top_k_results=3, lang="ko")
+            # top_k_results=1 : 첫 번째 결과만 사용
+            docs = retriever.get_relevant_documents(term)
+            return docs
 
     docs = None
     choice = st.selectbox(
@@ -128,20 +158,30 @@ if openaikey:
     else:
         response = run_quiz_chain(docs, topic if topic else file.name)
         st.write(response)
+        count = 0
+        count_score = 0
 
         with st.form("questions_form"):
             for question in response["questions"]:
                 st.write(question["질문"])
+
                 value = st.radio(
                     "Select an option.",
                     [선택지["선택지"] for 선택지 in question["선택지s"]],
                     index=None,
+                    key=count,
                 )
+                count += 1
                 if {"선택지": value, "정답": True} in question["선택지s"]:
                     st.success("정답")
+                    count_score += 1
                 elif value is not None:
                     st.error("오답")
             button = st.form_submit_button()
+
+        print(count)
+        if count_score == count:
+            st.balloons()
 else:
     st.markdown("OPENAI_API_KEY를 입력해주세요")
 
