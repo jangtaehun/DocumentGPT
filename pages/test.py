@@ -119,8 +119,8 @@ if openaikey:
         )
     else:
         # response = run_quiz_chain(docs, topic if topic else file.name)
-        response = chain.invoke({"city": "수원"})
-        response = response.additional_kwargs["function_call"]["arguments"]
+        # response = chain.invoke({"city": "수원"})
+        # response = response.additional_kwargs["function_call"]["arguments"]
 
         st.write(response)
         # count = 0
