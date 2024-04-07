@@ -10,6 +10,8 @@ from langchain.callbacks import StreamingStdOutCallbackHandler
 from langchain.schema import BaseOutputParser
 from prompt import quiz_prompt
 
+# from prompt import function_call
+
 
 # Function Calling
 # 우리가 만든 함수가 어떻게 생겼는지, 어떤 parameter 값을 원하는지 LLM에게 설명할 수 있다.
@@ -42,9 +44,6 @@ with st.sidebar:
     openaikey = st.text_input("Your OpenAI API key: ", type="password")
     os.environ["OPENAI_API_KEY"] = openaikey
 
-    c = st.container()
-    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
-
 if openaikey:
     llm = ChatOpenAI(
         temperature=0.1,
@@ -53,12 +52,11 @@ if openaikey:
         callbacks=[StreamingStdOutCallbackHandler()],
     )
 
+    #########
     # easy
-    # quiz_prompt.question_prompt
     easy_questions_chain = (
         {"context": format_docs} | quiz_prompt.easy_question_prompt | llm
     )
-    # quiz_prompt.formatting_prompt
     easy_formatting_chain = quiz_prompt.easy_formatting_prompt | llm
 
     # hard
@@ -67,11 +65,13 @@ if openaikey:
     )
     hard_formatting_chain = quiz_prompt.hard_formatting_prompt | llm
 
-    # 단지 tex file을 넣어준다. -> embed (X)
+    #########
+
+    # embed (X)
     @st.cache_data(show_spinner="Loading file...")
     def split_file(file):
         file_content = file.read()
-        file_path = f"./.cache/quiz_files/{file.name}"
+        file_path = f"files/{file.name}"
         with open(file_path, "wb") as f:
             f.write(file_content)
         splitter = CharacterTextSplitter.from_tiktoken_encoder(
@@ -83,13 +83,15 @@ if openaikey:
         docs = loader.load_and_split(text_splitter=splitter)
         return docs
 
-    select_custom = st.selectbox(
-        "난이도",
-        (
-            "쉬움",
-            "어려움",
-        ),
-    )
+    with st.sidebar:
+        select_custom = st.selectbox(
+            "난이도",
+            (
+                "쉬움",
+                "어려움",
+            ),
+            key="1",
+        )
     if select_custom == "쉬움":
 
         @st.cache_data(show_spinner="Making quiz...")
@@ -103,9 +105,7 @@ if openaikey:
 
         @st.cache_data(show_spinner="Searching Wikipedia...")
         def wiki_search(term):
-            # hash: 들어오는 데이터의 서명을 생성한다는 것
-            retriever = WikipediaRetriever(top_k_results=3)  # lang="ko"
-            # top_k_results=1 : 첫 번째 결과만 사용
+            retriever = WikipediaRetriever(top_k_results=3)
             docs = retriever.get_relevant_documents(term)
             return docs
 
@@ -122,13 +122,12 @@ if openaikey:
 
         @st.cache_data(show_spinner="Searching Wikipedia...")
         def wiki_search(term):
-            # hash: 들어오는 데이터의 서명을 생성한다는 것
-            retriever = WikipediaRetriever(top_k_results=3, lang="ko")
-            # top_k_results=1 : 첫 번째 결과만 사용
+            retriever = WikipediaRetriever(top_k_results=3)  # lang="ko"
             docs = retriever.get_relevant_documents(term)
             return docs
 
     docs = None
+    topic = None
     choice = st.selectbox(
         "Choose what you want to use.",
         (
@@ -136,6 +135,7 @@ if openaikey:
             "Wikipedia Article",
         ),
     )
+
     if choice == "File":
         file = st.file_uploader(
             "Upload a .docx, .txt or .pdf file", type=["docx", "txt", "pdf"]
@@ -157,6 +157,7 @@ if openaikey:
         )
     else:
         response = run_quiz_chain(docs, topic if topic else file.name)
+        # json 출력
         st.write(response)
         count = 0
         count_score = 0
@@ -179,10 +180,12 @@ if openaikey:
                     st.error("오답")
             button = st.form_submit_button()
 
-        print(count)
         if count_score == count:
             st.balloons()
 else:
     st.markdown("OPENAI_API_KEY를 입력해주세요")
 
-# 정답을 알려주는 코드
+
+with st.sidebar:
+    c = st.container()
+    c.link_button("git hub", url="https://github.com/jangtaehun/DocumentGPT")
