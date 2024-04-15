@@ -37,6 +37,7 @@ output_parser = JsonOutputParser()
 
 
 def format_docs(docs):
+    print(docs)
     return "\n\n".join(document.page_content for document in docs)
 
 
